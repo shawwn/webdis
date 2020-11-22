@@ -113,6 +113,9 @@ raw_array(const redisReply *r, size_t *sz) {
 	for(i = 0; i < r->elements; ++i) {
 		redisReply *e = r->element[i];
 		switch(e->type) {
+			case REDIS_REPLY_NIL:
+                                *sz += 5;
+                                break;
 			case REDIS_REPLY_STATUS:
 			case REDIS_REPLY_ERROR:
                                 *sz += 1 + e->len + 2;
@@ -137,6 +140,10 @@ raw_array(const redisReply *r, size_t *sz) {
 	for(i = 0; i < r->elements; ++i) {
 		redisReply *e = r->element[i];
 		switch(e->type) {
+                        case REDIS_REPLY_NIL:
+				memcpy(p, "$-1\r\n", 5);
+				p += 5;
+                                break;
                         case REDIS_REPLY_STATUS:
                         case REDIS_REPLY_ERROR:
 				*p = (e->type == REDIS_REPLY_STATUS?'+':'-');
@@ -199,6 +206,7 @@ raw_wrap(const redisReply *r, size_t *sz) {
 		case REDIS_REPLY_ARRAY:
 			return raw_array(r, sz);
 
+		case REDIS_REPLY_NIL:
 		default:
 			*sz = 5;
 			ret = malloc(*sz);
