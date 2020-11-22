@@ -68,6 +68,8 @@ raw_ws_extract(struct http_client *c, const char *p, size_t sz) {
 		redisReply *ri = reply->element[i];
 
 		switch(ri->type) {
+			case REDIS_REPLY_STATUS:
+			case REDIS_REPLY_ERROR:
 			case REDIS_REPLY_STRING:
 				cmd->argv_len[i] = ri->len;
 				cmd->argv[i] = calloc(cmd->argv_len[i] + 1, 1);
@@ -111,6 +113,10 @@ raw_array(const redisReply *r, size_t *sz) {
 	for(i = 0; i < r->elements; ++i) {
 		redisReply *e = r->element[i];
 		switch(e->type) {
+			case REDIS_REPLY_STATUS:
+			case REDIS_REPLY_ERROR:
+                                *sz = 1 + r->len + 2;
+                                break;
 			case REDIS_REPLY_STRING:
 				*sz += 1 + integer_length(e->len) + 2
 					+ e->len + 2;
@@ -131,6 +137,16 @@ raw_array(const redisReply *r, size_t *sz) {
 	for(i = 0; i < r->elements; ++i) {
 		redisReply *e = r->element[i];
 		switch(e->type) {
+                        case REDIS_REPLY_STATUS:
+                        case REDIS_REPLY_ERROR:
+				p += sprintf(p, "%c%d\r\n", REDIS_REPLY_STATUS?'+':'-', e->len);
+				memcpy(p, e->str, e->len);
+				p += e->len;
+				*p = '\r';
+				p++;
+				*p = '\n';
+				p++;
+                                break;
 			case REDIS_REPLY_STRING:
 				p += sprintf(p, "$%d\r\n", e->len);
 				memcpy(p, e->str, e->len);
