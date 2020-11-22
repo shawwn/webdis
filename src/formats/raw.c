@@ -128,6 +128,13 @@ raw_array(const redisReply *r, size_t *sz) {
 				*sz += 1 + integer_length(integer_length(e->integer)) + 2
 					+ integer_length(e->integer) + 2;
 				break;
+			case REDIS_REPLY_ARRAY:
+                                {
+                                      size_t size = 0;
+                                      free(raw_array(e, &size));
+                                      *sz += size;
+                                }
+				break;
 
 		}
 	}
@@ -167,6 +174,15 @@ raw_array(const redisReply *r, size_t *sz) {
 			case REDIS_REPLY_INTEGER:
 				p += sprintf(p, "$%d\r\n%lld\r\n",
 					integer_length(e->integer), e->integer);
+				break;
+			case REDIS_REPLY_ARRAY:
+                                {
+                                      size_t size = 0;
+                                      char* p2 = raw_array(e, &size);
+                                      memcpy(p, p2, size);
+                                      p += size;
+                                      free(p2);
+                                }
 				break;
 		}
 	}
