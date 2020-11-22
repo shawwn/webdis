@@ -125,8 +125,7 @@ raw_array(const redisReply *r, size_t *sz) {
 					+ e->len + 2;
 				break;
 			case REDIS_REPLY_INTEGER:
-				*sz += 1 + integer_length(integer_length(e->integer)) + 2
-					+ integer_length(e->integer) + 2;
+				*sz += 1 + integer_length(e->integer) + 2;
 				break;
 			case REDIS_REPLY_ARRAY:
                                 {
@@ -172,8 +171,8 @@ raw_array(const redisReply *r, size_t *sz) {
 				p++;
 				break;
 			case REDIS_REPLY_INTEGER:
-				p += sprintf(p, "$%d\r\n%lld\r\n",
-					integer_length(e->integer), e->integer);
+				p += sprintf(p, ":%lld\r\n",
+					e->integer);
 				break;
 			case REDIS_REPLY_ARRAY:
                                 {
