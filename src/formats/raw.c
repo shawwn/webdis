@@ -115,7 +115,7 @@ raw_array(const redisReply *r, size_t *sz) {
 		switch(e->type) {
 			case REDIS_REPLY_STATUS:
 			case REDIS_REPLY_ERROR:
-                                *sz = 1 + e->len + 2;
+                                *sz += 1 + e->len + 2;
                                 break;
 			case REDIS_REPLY_STRING:
 				*sz += 1 + integer_length(e->len) + 2
