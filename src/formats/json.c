@@ -106,7 +106,7 @@ json_array_to_keyvalue_reply(const redisReply *r) {
 		redisReply *k = r->element[i], *v = r->element[i+1];
 
 		/* keys need to be strings */
-		if(k->type != REDIS_REPLY_STRING) {
+		if(k->type != REDIS_REPLY_STRING && k->type != REDIS_REPLY_STATUS) {
 			json_decref(jroot);
 			return NULL;
 		}
@@ -116,6 +116,7 @@ json_array_to_keyvalue_reply(const redisReply *r) {
 			break;
 			
 		case REDIS_REPLY_STRING:
+		case REDIS_REPLY_STATUS:
 			json_object_set_new(jroot, k->str, json_string(v->str));
 			break;
 			
@@ -152,6 +153,7 @@ json_expand_array(const redisReply *r) {
 		e = r->element[i];
 		switch(e->type) {
 		case REDIS_REPLY_STRING:
+		case REDIS_REPLY_STATUS:
 			json_array_append_new(jlist, json_string(e->str));
 			break;
 			
