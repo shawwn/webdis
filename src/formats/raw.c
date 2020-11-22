@@ -139,7 +139,7 @@ raw_array(const redisReply *r, size_t *sz) {
 		switch(e->type) {
                         case REDIS_REPLY_STATUS:
                         case REDIS_REPLY_ERROR:
-				*p = REDIS_REPLY_STATUS?'+':'-';
+				*p = (e->type == REDIS_REPLY_STATUS?'+':'-');
 				p++;
 				memcpy(p, e->str, e->len);
 				p += e->len;
